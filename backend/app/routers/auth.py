@@ -80,6 +80,9 @@ def google_auth(auth_in: GoogleAuthRequest):
                 "avatar_color": "#3B82F6",
                 "picture": picture,
                 "household_code": target_code,
+                "family_household_code": target_code,
+                "personal_household_code": f"GHAR-PERS-{new_id}",
+                "active_mode": "FAMILY",
                 "created_at": datetime.datetime.utcnow().isoformat()
             }
             users_collection.insert_one(user)

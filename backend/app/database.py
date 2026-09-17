@@ -121,6 +121,26 @@ settlements_collection = CollectionWrapper(raw_db["settlements"])
 counters_collection = CollectionWrapper(raw_db["counters"])
 
 def get_next_id(sequence_name: str) -> int:
+    col_map = {
+        "users": "users",
+        "inflow_pools": "inflow_pools",
+        "expenses": "expenses",
+        "expense_splits": "expenses",
+        "errand_items": "errand_items",
+        "market_status": "market_status",
+        "settlements": "settlements"
+    }
+    if is_local_mode:
+        target = col_map.get(sequence_name, sequence_name)
+        try:
+            docs = list(raw_db[target].find())
+            existing_ids = [d.get("id", 0) for d in docs if isinstance(d.get("id"), int)]
+            if existing_ids:
+                return max(existing_ids) + 1
+        except Exception:
+            pass
+        return 1
+
     result = counters_collection.find_one_and_update(
         {"_id": sequence_name},
         {"$inc": {"seq": 1}},
