@@ -13,8 +13,8 @@ export const BottomNav: React.FC = () => {
   ];
 
   return (
-    <nav className="fixed bottom-0 inset-x-0 z-40 bg-white/95 backdrop-blur-md border-t border-slate-200/80 px-2 py-1 shadow-lg no-print">
-      <div className="max-w-md mx-auto grid grid-cols-4 h-14">
+    <nav className="fixed bottom-0 inset-x-0 z-40 bg-white/95 backdrop-blur-md border-t border-slate-200/80 px-2 pt-1.5 pb-[max(0.5rem,env(safe-area-inset-bottom))] shadow-lg no-print">
+      <div className="max-w-md mx-auto grid grid-cols-4 h-12">
         {tabs.map((tab) => {
           const Icon = tab.icon;
           const isActive = activeTab === tab.id;
@@ -22,7 +22,7 @@ export const BottomNav: React.FC = () => {
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
-              className={`flex flex-col items-center justify-center gap-0.5 min-h-[48px] rounded-xl transition-all ${
+              className={`flex flex-col items-center justify-center gap-0.5 min-h-[48px] rounded-xl transition-all active:scale-95 ${
                 isActive
                   ? 'text-indigo-600 font-bold'
                   : 'text-slate-400 hover:text-slate-600 font-medium'

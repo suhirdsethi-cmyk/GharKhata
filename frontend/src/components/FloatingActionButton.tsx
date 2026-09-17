@@ -9,13 +9,13 @@ export const FloatingActionButton: React.FC = () => {
   return (
     <>
       {/* Floating Button Anchored Bottom Right Above Bottom Nav */}
-      <div className="fixed bottom-20 right-5 z-40 no-print">
+      <div className="fixed bottom-[calc(4.5rem+env(safe-area-inset-bottom))] right-4 z-40 no-print">
         <button
           onClick={() => setIsOpen(true)}
-          className="w-14 h-14 rounded-full bg-indigo-600 hover:bg-indigo-700 text-white flex items-center justify-center shadow-lg shadow-indigo-500/30 ring-4 ring-indigo-50 transition-all active:scale-95"
+          className="w-13 h-13 rounded-full bg-indigo-600 hover:bg-indigo-700 text-white flex items-center justify-center shadow-lg shadow-indigo-500/30 ring-4 ring-indigo-50 transition-all active:scale-95"
           aria-label="Add New"
         >
-          <Plus className="w-7 h-7" />
+          <Plus className="w-6 h-6" />
         </button>
       </div>
 
@@ -27,11 +27,11 @@ export const FloatingActionButton: React.FC = () => {
             onClick={() => setIsOpen(false)} 
           />
 
-          <div className="relative bg-white rounded-t-3xl p-6 shadow-2xl space-y-4 animate-bottom-sheet max-w-md mx-auto w-full">
+          <div className="relative bg-white rounded-t-3xl p-5 pb-[max(1.25rem,env(safe-area-inset-bottom))] shadow-2xl space-y-4 animate-bottom-sheet max-w-md mx-auto w-full">
             {/* Drag Handle indicator */}
-            <div className="w-12 h-1.5 bg-slate-200 rounded-full mx-auto mb-2" />
+            <div className="w-12 h-1.5 bg-slate-200 rounded-full mx-auto mb-1" />
 
-            <div className="flex items-center justify-between pb-2">
+            <div className="flex items-center justify-between pb-1">
               <h3 className="text-base font-bold text-slate-800">Quick Add Action</h3>
               <button
                 onClick={() => setIsOpen(false)}
@@ -49,9 +49,9 @@ export const FloatingActionButton: React.FC = () => {
                   setIsOpen(false);
                   setIsAddExpenseOpen(true);
                 }}
-                className="flex items-center gap-4 p-4 rounded-2xl bg-indigo-50 hover:bg-indigo-100/80 text-indigo-700 font-bold text-left transition-all border border-indigo-100 min-h-[56px]"
+                className="flex items-center gap-4 p-4 rounded-2xl bg-indigo-50 hover:bg-indigo-100/80 text-indigo-700 font-bold text-left transition-all border border-indigo-100 min-h-[56px] active:scale-[0.98]"
               >
-                <div className="w-10 h-10 rounded-xl bg-indigo-600 text-white flex items-center justify-center shrink-0">
+                <div className="w-10 h-10 rounded-xl bg-indigo-600 text-white flex items-center justify-center shrink-0 shadow-xs">
                   <Receipt className="w-5 h-5" />
                 </div>
                 <div>
@@ -66,9 +66,9 @@ export const FloatingActionButton: React.FC = () => {
                   setIsOpen(false);
                   setIsAddErrandOpen(true);
                 }}
-                className="flex items-center gap-4 p-4 rounded-2xl bg-emerald-50 hover:bg-emerald-100/80 text-emerald-800 font-bold text-left transition-all border border-emerald-100 min-h-[56px]"
+                className="flex items-center gap-4 p-4 rounded-2xl bg-emerald-50 hover:bg-emerald-100/80 text-emerald-800 font-bold text-left transition-all border border-emerald-100 min-h-[56px] active:scale-[0.98]"
               >
-                <div className="w-10 h-10 rounded-xl bg-emerald-600 text-white flex items-center justify-center shrink-0">
+                <div className="w-10 h-10 rounded-xl bg-emerald-600 text-white flex items-center justify-center shrink-0 shadow-xs">
                   <ShoppingBag className="w-5 h-5" />
                 </div>
                 <div>
