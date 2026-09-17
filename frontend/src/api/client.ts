@@ -72,6 +72,11 @@ export async function createUser(data: { name: string; role?: string; avatar_col
   return res.json();
 }
 
+export async function deleteUser(userId: number): Promise<void> {
+  const res = await fetch(`${API_BASE}/api/users/${userId}`, { method: 'DELETE' });
+  if (!res.ok) throw new Error('Failed to remove user');
+}
+
 export async function resetAllData(householdCode?: string): Promise<void> {
   const url = householdCode ? `${API_BASE}/api/users/reset-data?household_code=${householdCode}` : `${API_BASE}/api/users/reset-data`;
   const res = await fetch(url, { method: 'POST' });

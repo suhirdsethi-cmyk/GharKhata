@@ -56,6 +56,16 @@ def create_user(user_in: UserCreateReq):
     user_res = users_collection.find_one({"id": new_id}, {"_id": 0})
     return user_res
 
+@router.delete("/{user_id}")
+def delete_user(user_id: int):
+    user = users_collection.find_one({"id": user_id})
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+    
+    users_collection.delete_one({"id": user_id})
+    market_collection.delete_many({"user_id": user_id})
+    return {"message": f"User {user.get('name')} deleted successfully"}
+
 @router.post("/reset-data")
 def reset_sample_data(household_code: Optional[str] = None):
     query = {}

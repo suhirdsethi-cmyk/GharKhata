@@ -68,7 +68,7 @@ def google_auth(auth_in: GoogleAuthRequest):
             target_code = auth_in.household_code.strip().upper() if auth_in.household_code else None
             
             if not target_code:
-                target_code = generate_household_code()
+                target_code = "GHAR-SINGHFAMILY"
 
             new_id = get_next_id("users")
             user = {

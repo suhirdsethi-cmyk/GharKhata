@@ -1,5 +1,6 @@
 import React from 'react';
 import { useApp } from '../../context/AppContext';
+import { deleteUser } from '../../api/client';
 import { 
   Landmark, 
   Wallet, 
@@ -14,14 +15,25 @@ import {
   Receipt,
   ShoppingBag,
   Share2,
-  FileText
+  FileText,
+  Trash2
 } from 'lucide-react';
 
 import { GoogleLogin } from '@react-oauth/google';
 import { CategoryAnalyticsCard } from '../Analytics/CategoryAnalyticsCard';
 
 export const DashboardView: React.FC = () => {
-  const { stats, loading, activeMonth, currentUser, users, loginUserWithGoogle, setActiveTab, setIsAddExpenseOpen, setIsAddInflowOpen, setIsHouseholdModalOpen, setIsReportExportOpen } = useApp();
+  const { stats, loading, activeMonth, currentUser, users, loginUserWithGoogle, setActiveTab, setIsAddExpenseOpen, setIsAddInflowOpen, setIsHouseholdModalOpen, setIsReportExportOpen, refreshData } = useApp();
+
+  const handleRemoveMember = async (userId: number, name: string) => {
+    if (!window.confirm(`Remove ${name} from this family household?`)) return;
+    try {
+      await deleteUser(userId);
+      await refreshData();
+    } catch (err) {
+      console.error('Failed to remove member:', err);
+    }
+  };
 
   if (loading && !stats) {
     return (
@@ -253,6 +265,15 @@ export const DashboardView: React.FC = () => {
                 <span className="text-[10px] font-bold text-slate-500 bg-slate-100 px-2.5 py-1 rounded-full capitalize">
                   {u.role || 'Member'}
                 </span>
+                {u.id !== currentUser?.id && (
+                  <button
+                    onClick={() => handleRemoveMember(u.id, u.name)}
+                    className="p-1.5 text-slate-400 hover:text-rose-600 transition-colors rounded-xl hover:bg-rose-50"
+                    title={`Remove ${u.name} from family household`}
+                  >
+                    <Trash2 className="w-3.5 h-3.5" />
+                  </button>
+                )}
               </div>
             </div>
           ))}
