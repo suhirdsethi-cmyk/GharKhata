@@ -1,7 +1,11 @@
 import os
 import json
 import datetime
-from dotenv import load_dotenv
+try:
+    from dotenv import load_dotenv
+    load_dotenv()
+except ImportError:
+    pass
 from pymongo import MongoClient
 from pymongo.collection import ReturnDocument
 
