@@ -1,16 +1,14 @@
 import React, { useState } from 'react';
 import { useApp } from '../context/AppContext';
 import { resetAllData } from '../api/client';
-import { Calendar, Sparkles, RotateCcw, LogOut, Users, User, Copy, Check, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Calendar, Sparkles, RotateCcw, LogOut, Users, User, Copy, Check, ChevronLeft, ChevronRight, Loader2 } from 'lucide-react';
 import { getRecentMonthsList, formatMonthHuman, getPreviousMonthStr, getNextMonthStr } from '../utils/dateUtils';
 
 export const Navbar: React.FC = () => {
   const { 
     activeMonth, 
     setActiveMonth, 
-    users, 
     currentUser, 
-    setCurrentUser, 
     setIsHouseholdModalOpen,
     switchUserMode,
     logoutUser, 
@@ -18,6 +16,7 @@ export const Navbar: React.FC = () => {
   } = useApp();
 
   const [copiedCode, setCopiedCode] = useState(false);
+  const [isSwitchingMode, setIsSwitchingMode] = useState(false);
   const months = getRecentMonthsList(24);
 
   const handlePrevMonth = () => {
@@ -31,13 +30,15 @@ export const Navbar: React.FC = () => {
   const isPersonal = currentUser?.active_mode === 'PERSONAL' || currentUser?.household_code?.includes('PERS');
 
   const handleToggleLedgerMode = async () => {
-    if (!currentUser) return;
+    if (!currentUser || isSwitchingMode) return;
     const targetMode = isPersonal ? 'FAMILY' : 'PERSONAL';
     try {
+      setIsSwitchingMode(true);
       await switchUserMode(targetMode);
-      await refreshData();
     } catch (err) {
       console.error('Failed to switch ledger mode:', err);
+    } finally {
+      setIsSwitchingMode(false);
     }
   };
 
@@ -90,15 +91,22 @@ export const Navbar: React.FC = () => {
           {currentUser && (
             <button
               onClick={handleToggleLedgerMode}
+              disabled={isSwitchingMode}
               className={`px-2.5 py-1.5 rounded-xl font-bold text-[11px] flex items-center gap-1 border transition-all shrink-0 ${
                 isPersonal 
                   ? 'bg-amber-50 hover:bg-amber-100 text-amber-900 border-amber-200' 
                   : 'bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border-indigo-200'
-              }`}
+              } ${isSwitchingMode ? 'opacity-70 cursor-wait' : ''}`}
               title={isPersonal ? "Currently on Solo Personal Ledger. Click to switch to Shared Family Household." : "Currently on Shared Family Household. Click to switch to Solo Personal Ledger."}
             >
-              {isPersonal ? <User className="w-3.5 h-3.5 text-amber-600" /> : <Users className="w-3.5 h-3.5 text-indigo-600" />}
-              <span>{isPersonal ? 'Solo Mode' : 'Family Mode'}</span>
+              {isSwitchingMode ? (
+                <Loader2 className="w-3.5 h-3.5 animate-spin text-indigo-600" />
+              ) : isPersonal ? (
+                <User className="w-3.5 h-3.5 text-amber-600" />
+              ) : (
+                <Users className="w-3.5 h-3.5 text-indigo-600" />
+              )}
+              <span>{isSwitchingMode ? 'Switching...' : isPersonal ? 'Solo Mode' : 'Family Mode'}</span>
             </button>
           )}
 
@@ -150,7 +158,7 @@ export const Navbar: React.FC = () => {
 
           {/* Logged In User Profile & Logout */}
           {currentUser && (
-            <div className="flex items-center gap-1 bg-slate-100/90 px-2 py-1.5 rounded-xl text-[11px] font-bold text-slate-700 border border-slate-200/60 shrink-0">
+            <div className="flex items-center gap-1.5 bg-slate-100/90 px-2.5 py-1.5 rounded-xl text-[11px] font-bold text-slate-700 border border-slate-200/60 shrink-0">
               {currentUser.picture ? (
                 <img src={currentUser.picture} alt="Avatar" className="w-4 h-4 rounded-full shrink-0" />
               ) : (
@@ -160,26 +168,9 @@ export const Navbar: React.FC = () => {
                 />
               )}
 
-              {users.length > 1 ? (
-                <select
-                  value={currentUser.id}
-                  onChange={(e) => {
-                    const target = users.find((u: any) => u.id === Number(e.target.value));
-                    if (target) setCurrentUser(target);
-                  }}
-                  className="bg-transparent text-slate-800 font-bold focus:outline-none cursor-pointer max-w-[65px] truncate"
-                >
-                  {users.map((u: any) => (
-                    <option key={u.id} value={u.id} className="bg-white text-slate-800">
-                      {u.name.split(' ')[0]}
-                    </option>
-                  ))}
-                </select>
-              ) : (
-                <span className="font-extrabold text-slate-800 max-w-[65px] truncate">
-                  {currentUser.name.split(' ')[0]}
-                </span>
-              )}
+              <span className="font-extrabold text-slate-800 max-w-[70px] truncate">
+                {currentUser.name.split(' ')[0]}
+              </span>
 
               {/* Logout Button */}
               <button

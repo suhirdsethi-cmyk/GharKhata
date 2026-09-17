@@ -88,14 +88,6 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       const fetchedUsers = await fetchUsers(hCode);
       setUsers(fetchedUsers);
       
-      const updatedCurrent = fetchedUsers.find(u => u.id === currentUser.id);
-      if (updatedCurrent) {
-        setCurrentUser(updatedCurrent);
-        try {
-          localStorage.setItem('gharkhata_current_user', JSON.stringify(updatedCurrent));
-        } catch (e) {}
-      }
-
       const fetchedStats = await fetchDashboardStats(activeMonth, hCode);
       setStats(fetchedStats);
     } catch (err) {
