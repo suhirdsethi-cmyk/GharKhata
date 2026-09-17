@@ -9,6 +9,7 @@ import {
   ArrowDownLeft, 
   ChevronRight,
   Users,
+  User,
   UserPlus,
   Receipt,
   ShoppingBag,
@@ -171,13 +172,19 @@ export const DashboardView: React.FC = () => {
       {/* 4. SPENDING ANALYTICS CARD */}
       <CategoryAnalyticsCard />
 
-      {/* 5. FAMILY MEMBERS CARD */}
+      {/* 5. FAMILY MEMBERS / SOLO PERSONAL ACCOUNT CARD */}
       <div className="bg-white rounded-3xl p-5 border border-slate-100 shadow-sm space-y-3">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <Users className="w-4 h-4 text-indigo-600" />
+            {currentUser?.active_mode === 'PERSONAL' || currentUser?.household_code?.includes('PERS') ? (
+              <User className="w-4 h-4 text-amber-600" />
+            ) : (
+              <Users className="w-4 h-4 text-indigo-600" />
+            )}
             <h3 className="text-xs font-black text-slate-900 uppercase tracking-wider">
-              Family Members ({users.length})
+              {currentUser?.active_mode === 'PERSONAL' || currentUser?.household_code?.includes('PERS')
+                ? 'Personal Solo Account'
+                : `Family Members (${users.length})`}
             </h3>
           </div>
           
@@ -190,8 +197,25 @@ export const DashboardView: React.FC = () => {
           </button>
         </div>
 
+        {currentUser?.active_mode === 'PERSONAL' || currentUser?.household_code?.includes('PERS') ? (
+          <div className="p-3 bg-amber-50/80 border border-amber-100 rounded-2xl space-y-2">
+            <div className="flex items-center justify-between">
+              <span className="text-xs font-extrabold text-amber-900 flex items-center gap-1.5">
+                <span className="w-2 h-2 rounded-full bg-amber-500 animate-pulse"></span>
+                Solo Ledger Active ({currentUser.household_code})
+              </span>
+              <span className="text-[10px] font-bold text-amber-700 bg-white/80 px-2 py-0.5 rounded-full border border-amber-200">
+                Private Mode
+              </span>
+            </div>
+            <p className="text-[11px] text-amber-800/80 font-medium leading-relaxed">
+              Your expenses, checklist, and dues are completely private to you in Solo Mode. Click <strong>"Solo Mode"</strong> in the top header anytime to switch back to your shared Family Household.
+            </p>
+          </div>
+        ) : null}
+
         <div className="divide-y divide-slate-100">
-          {users.map((u: any) => (
+          {(users.length > 0 ? users : currentUser ? [currentUser] : []).map((u: any) => (
             <div key={u.id} className="py-2.5 flex items-center justify-between first:pt-0 last:pb-0">
               <div className="flex items-center gap-3">
                 {u.picture ? (
