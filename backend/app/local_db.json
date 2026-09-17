@@ -1,0 +1,83 @@
+{
+  "users": [
+    {
+      "id": 1,
+      "google_id": "google_1",
+      "name": "suhird sethi",
+      "email": "suhird.sethi@gmail.com",
+      "role": "Admin",
+      "avatar_color": "#3B82F6",
+      "household_code": "GHAR-SINGHFAMILY",
+      "family_household_code": "GHAR-SINGHFAMILY",
+      "personal_household_code": "GHAR-PERS-1",
+      "active_mode": "FAMILY",
+      "created_at": "2026-09-01T00:00:00"
+    },
+    {
+      "id": 2,
+      "google_id": "google_2",
+      "name": "suhirds868",
+      "email": "suhirds868@gmail.com",
+      "role": "Member",
+      "avatar_color": "#10B981",
+      "household_code": "GHAR-SINGHFAMILY",
+      "family_household_code": "GHAR-SINGHFAMILY",
+      "personal_household_code": "GHAR-PERS-2",
+      "active_mode": "FAMILY",
+      "created_at": "2026-09-01T00:00:00"
+    }
+  ],
+  "inflow_pools": [],
+  "expenses": [],
+  "errand_items": [],
+  "market_status": [
+    {
+      "id": 1,
+      "user_id": 1,
+      "household_code": "GHAR-SINGHFAMILY",
+      "is_active": false
+    },
+    {
+      "id": 2,
+      "user_id": 2,
+      "household_code": "GHAR-SINGHFAMILY",
+      "is_active": false
+    }
+  ],
+  "settlements": [],
+  "counters": [
+    {
+      "seq": 2
+    },
+    {
+      "seq": 1
+    },
+    {
+      "seq": 2
+    },
+    {
+      "seq": 0
+    },
+    {
+      "seq": 2
+    },
+    {
+      "seq": 0
+    },
+    {
+      "seq": 1
+    },
+    {
+      "seq": 1
+    },
+    {
+      "seq": 1
+    },
+    {
+      "seq": 1
+    },
+    {
+      "seq": 2
+    }
+  ]
+}

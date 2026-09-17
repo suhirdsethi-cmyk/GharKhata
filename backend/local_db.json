@@ -1,0 +1,15 @@
+{
+  "users": [
+    {
+      "id": 1,
+      "name": "suhird sethi",
+      "household_code": "GHAR-SINGHFAMILY"
+    }
+  ],
+  "inflow_pools": [],
+  "expenses": [],
+  "errand_items": [],
+  "market_status": [],
+  "settlements": [],
+  "counters": []
+}
