@@ -1,0 +1,18 @@
+{
+  "name": "GharKhata - Household & Rental Reserve",
+  "short_name": "GharKhata",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0f172a",
+  "theme_color": "#4f46e5",
+  "orientation": "portrait",
+  "description": "Effortless, mobile-first household expense, rental reserve cashflow, and grocery checklist app.",
+  "icons": [
+    {
+      "src": "/icon.svg",
+      "sizes": "192x192 512x512",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
