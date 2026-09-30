@@ -11,7 +11,6 @@ export function getRecentMonthsList(count: number = 24): string[] {
   let currentYear = now.getFullYear();
   let currentMonth = now.getMonth() + 1; // 1-12
 
-  // Force starting from 2026-09 if system date is in 2026-09, or current date
   for (let i = 0; i < count; i++) {
     const yyyy = currentYear;
     const mm = currentMonth < 10 ? `0${currentMonth}` : `${currentMonth}`;
@@ -24,9 +23,9 @@ export function getRecentMonthsList(count: number = 24): string[] {
     }
   }
 
-  // Ensure 2026-09 is included at minimum
+  // Also include 2026-09 if present in historical data
   if (!months.includes('2026-09')) {
-    months.unshift('2026-09');
+    months.push('2026-09');
   }
 
   return months;

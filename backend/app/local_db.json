@@ -3,7 +3,7 @@
     {
       "id": 1,
       "google_id": "google_1",
-      "name": "suhird sethi",
+      "name": "Suhird Singh",
       "email": "suhird.sethi@gmail.com",
       "role": "Admin",
       "avatar_color": "#3B82F6",
@@ -16,8 +16,8 @@
     {
       "id": 2,
       "google_id": "google_2",
-      "name": "suhirds868",
-      "email": "suhirds868@gmail.com",
+      "name": "Aman Sharma",
+      "email": "aman@gmail.com",
       "role": "Member",
       "avatar_color": "#10B981",
       "household_code": "GHAR-SINGHFAMILY",
@@ -25,59 +25,157 @@
       "personal_household_code": "GHAR-PERS-2",
       "active_mode": "FAMILY",
       "created_at": "2026-09-01T00:00:00"
+    },
+    {
+      "id": 3,
+      "google_id": "google_3",
+      "name": "Priya Verma",
+      "email": "priya@gmail.com",
+      "role": "Member",
+      "avatar_color": "#EC4899",
+      "household_code": "GHAR-SINGHFAMILY",
+      "family_household_code": "GHAR-SINGHFAMILY",
+      "personal_household_code": "GHAR-PERS-3",
+      "active_mode": "FAMILY",
+      "created_at": "2026-09-01T00:00:00"
     }
   ],
-  "inflow_pools": [],
-  "expenses": [],
-  "errand_items": [],
+  "inflow_pools": [
+    {
+      "id": 1,
+      "title": "Ground Floor Rent - Flat 101",
+      "amount": 35000.0,
+      "month_year": "2026-09",
+      "household_code": "GHAR-SINGHFAMILY",
+      "created_at": "2026-09-01T00:00:00"
+    },
+    {
+      "id": 2,
+      "title": "First Floor Rent - Flat 201",
+      "amount": 25000.0,
+      "month_year": "2026-09",
+      "household_code": "GHAR-SINGHFAMILY",
+      "created_at": "2026-09-01T00:00:00"
+    }
+  ],
+  "expenses": [
+    {
+      "id": 1,
+      "title": "Monthly Milk Token (Mother Dairy)",
+      "amount": 4200.0,
+      "category": "Groceries",
+      "payer_id": 1,
+      "funding_source": "RENTAL_POOL",
+      "split_type": "EQUAL",
+      "date": "2026-09-02",
+      "receipt_note": "Paid from central rental cash reserve",
+      "household_code": "GHAR-SINGHFAMILY",
+      "created_at": "2026-09-02T10:00:00",
+      "splits": []
+    },
+    {
+      "id": 2,
+      "title": "BSES Electricity Bill (Whole House)",
+      "amount": 7850.0,
+      "category": "Utilities",
+      "payer_id": 1,
+      "funding_source": "RENTAL_POOL",
+      "split_type": "EQUAL",
+      "date": "2026-09-05",
+      "receipt_note": "Paid online via net banking",
+      "household_code": "GHAR-SINGHFAMILY",
+      "created_at": "2026-09-05T12:00:00",
+      "splits": []
+    },
+    {
+      "id": 3,
+      "title": "Weekly Fresh Veggies & Fruits (Local Mandi)",
+      "amount": 1800.0,
+      "category": "Groceries",
+      "payer_id": 1,
+      "funding_source": "PERSONAL",
+      "split_type": "EQUAL",
+      "date": "2026-09-12",
+      "receipt_note": "Paid cash out-of-pocket by Suhird",
+      "household_code": "GHAR-SINGHFAMILY",
+      "created_at": "2026-09-12T14:00:00",
+      "splits": [
+        { "id": 1, "expense_id": 3, "user_id": 1, "share_amount": 600.0, "is_settled": false },
+        { "id": 2, "expense_id": 3, "user_id": 2, "share_amount": 600.0, "is_settled": false },
+        { "id": 3, "expense_id": 3, "user_id": 3, "share_amount": 600.0, "is_settled": false }
+      ]
+    }
+  ],
+  "errand_items": [
+    {
+      "id": 1,
+      "name": "Fresh Tomatoes & Spinach (2 kg)",
+      "category": "Vegetables & Fruit",
+      "status": "PENDING",
+      "added_by_id": 1,
+      "household_code": "GHAR-SINGHFAMILY",
+      "created_at": "2026-09-15T09:00:00"
+    },
+    {
+      "id": 2,
+      "name": "Full Cream Milk (2 Packets)",
+      "category": "Dairy & Bread",
+      "status": "IN_CART",
+      "added_by_id": 3,
+      "household_code": "GHAR-SINGHFAMILY",
+      "created_at": "2026-09-15T10:00:00"
+    },
+    {
+      "id": 3,
+      "name": "Floor Disinfectant Cleaner",
+      "category": "Chemist/Pharmacy",
+      "status": "BOUGHT",
+      "added_by_id": 2,
+      "household_code": "GHAR-SINGHFAMILY",
+      "created_at": "2026-09-14T11:00:00"
+    }
+  ],
   "market_status": [
     {
       "id": 1,
       "user_id": 1,
       "household_code": "GHAR-SINGHFAMILY",
-      "is_active": false
+      "is_active": false,
+      "updated_at": "2026-09-15T12:00:00"
     },
     {
       "id": 2,
       "user_id": 2,
       "household_code": "GHAR-SINGHFAMILY",
-      "is_active": false
+      "is_active": true,
+      "updated_at": "2026-09-15T12:00:00"
+    },
+    {
+      "id": 3,
+      "user_id": 3,
+      "household_code": "GHAR-SINGHFAMILY",
+      "is_active": false,
+      "updated_at": "2026-09-15T12:00:00"
     }
   ],
-  "settlements": [],
-  "counters": [
+  "settlements": [
     {
-      "seq": 2
-    },
-    {
-      "seq": 1
-    },
-    {
-      "seq": 2
-    },
-    {
-      "seq": 0
-    },
-    {
-      "seq": 2
-    },
-    {
-      "seq": 0
-    },
-    {
-      "seq": 1
-    },
-    {
-      "seq": 1
-    },
-    {
-      "seq": 1
-    },
-    {
-      "seq": 1
-    },
-    {
-      "seq": 2
+      "id": 1,
+      "payer_id": 3,
+      "receiver_id": 1,
+      "amount": 400.0,
+      "notes": "Cash partial settlement for groceries",
+      "household_code": "GHAR-SINGHFAMILY",
+      "created_at": "2026-09-15T16:00:00"
     }
+  ],
+  "counters": [
+    { "seq_name": "users", "seq": 3 },
+    { "seq_name": "inflow_pools", "seq": 2 },
+    { "seq_name": "expenses", "seq": 3 },
+    { "seq_name": "expense_splits", "seq": 3 },
+    { "seq_name": "errand_items", "seq": 3 },
+    { "seq_name": "market_status", "seq": 3 },
+    { "seq_name": "settlements", "seq": 1 }
   ]
 }

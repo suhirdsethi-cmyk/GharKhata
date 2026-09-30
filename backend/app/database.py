@@ -20,7 +20,11 @@ LOCAL_DB_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "local_
 
 def _init_db():
     try:
-        client = MongoClient(MONGODB_URL, serverSelectionTimeoutMS=2000, tlsAllowInvalidCertificates=True)
+        try:
+            import certifi
+            client = MongoClient(MONGODB_URL, serverSelectionTimeoutMS=2000, tlsAllowInvalidCertificates=True, tlsCAFile=certifi.where())
+        except Exception:
+            client = MongoClient(MONGODB_URL, serverSelectionTimeoutMS=2000, tlsAllowInvalidCertificates=True)
         client.admin.command('ping')
         db = client.get_database("gharkhata")
         print("MongoDB Atlas connected successfully!")
@@ -37,13 +41,24 @@ def _init_db():
                     data = json.load(f)
                 for col_name, docs in data.items():
                     if docs:
-                        db[col_name].insert_many(docs)
+                        prepared_docs = []
+                        for d in docs:
+                            dc = dict(d)
+                            if "seq_name" in dc:
+                                dc["_id"] = dc.pop("seq_name")
+                            prepared_docs.append(dc)
+                        db[col_name].insert_many(prepared_docs)
             except Exception as le:
                 print(f"Error loading local_db.json: {le}")
         return db, True
 
 raw_db, is_local_mode = _init_db()
 mongo_db = raw_db
+
+def _json_serial(obj):
+    if isinstance(obj, (datetime.datetime, datetime.date)):
+        return obj.isoformat()
+    return str(obj)
 
 def _save_local_db():
     if not is_local_mode:
@@ -56,11 +71,17 @@ def _save_local_db():
             clean_docs = []
             for d in docs:
                 dc = dict(d)
-                dc.pop("_id", None)
+                seq_id = dc.pop("_id", None)
+                if seq_id is not None:
+                    if c == "counters":
+                        dc["seq_name"] = str(seq_id)
                 clean_docs.append(dc)
             data[c] = clean_docs
-        with open(LOCAL_DB_PATH, "w") as f:
-            json.dump(data, f, indent=2)
+        
+        temp_path = LOCAL_DB_PATH + ".tmp"
+        with open(temp_path, "w") as f:
+            json.dump(data, f, indent=2, default=_json_serial)
+        os.replace(temp_path, LOCAL_DB_PATH)
     except Exception as err:
         print(f"Error saving to local_db.json: {err}")
 

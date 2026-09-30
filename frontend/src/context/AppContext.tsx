@@ -50,6 +50,13 @@ interface AppContextType {
 const AppContext = createContext<AppContextType | undefined>(undefined);
 
 export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const getCurrentMonthStr = () => {
+    const now = new Date();
+    const yyyy = now.getFullYear();
+    const mm = String(now.getMonth() + 1).padStart(2, '0');
+    return `${yyyy}-${mm}`;
+  };
+
   const [users, setUsers] = useState<User[]>([]);
   const [currentUser, setCurrentUser] = useState<User | null>(() => {
     try {
@@ -59,7 +66,24 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       return null;
     }
   });
-  const [activeMonth, setActiveMonth] = useState<string>('2026-09');
+
+  const [activeMonthState, setActiveMonthState] = useState<string>(() => {
+    try {
+      const saved = localStorage.getItem('gharkhata_active_month');
+      return saved || getCurrentMonthStr();
+    } catch (e) {
+      return getCurrentMonthStr();
+    }
+  });
+
+  const setActiveMonth = (month: string) => {
+    setActiveMonthState(month);
+    try {
+      localStorage.setItem('gharkhata_active_month', month);
+    } catch (e) {}
+  };
+
+  const activeMonth = activeMonthState;
   const [activeTab, setActiveTab] = useState<AppTab>('home');
   const [stats, setStats] = useState<DashboardStats | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
@@ -75,20 +99,22 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const [quickErrandToExpense, setQuickErrandToExpense] = useState<ErrandItem | null>(null);
 
   const refreshData = useCallback(async () => {
-    if (!currentUser) {
-      setUsers([]);
-      setStats(null);
-      setLoading(false);
-      return;
-    }
-
     try {
       setLoading(true);
-      const hCode = currentUser.household_code;
+      const hCode = currentUser?.household_code || 'GHAR-SINGHFAMILY';
       const fetchedUsers = await fetchUsers(hCode);
       setUsers(fetchedUsers);
       
-      const fetchedStats = await fetchDashboardStats(activeMonth, hCode);
+      let effectiveUser = currentUser;
+      if (!effectiveUser && fetchedUsers.length > 0) {
+        effectiveUser = fetchedUsers[0];
+        setCurrentUser(effectiveUser);
+        try {
+          localStorage.setItem('gharkhata_current_user', JSON.stringify(effectiveUser));
+        } catch (e) {}
+      }
+
+      const fetchedStats = await fetchDashboardStats(activeMonth, effectiveUser?.household_code || hCode);
       setStats(fetchedStats);
     } catch (err) {
       console.error('Error refreshing app data:', err);

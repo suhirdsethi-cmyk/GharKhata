@@ -13,13 +13,15 @@ export const AddExpenseModal: React.FC = () => {
     refreshData 
   } = useApp();
 
+  const getTodayStr = () => new Date().toISOString().split('T')[0];
+
   const [title, setTitle] = useState('');
   const [amount, setAmount] = useState('');
   const [category, setCategory] = useState('Groceries');
   const [payerId, setPayerId] = useState<number>(currentUser?.id || 1);
   const [fundingSource, setFundingSource] = useState<'RENTAL_POOL' | 'PERSONAL'>('RENTAL_POOL');
   const [splitType, setSplitType] = useState<'EQUAL' | 'CUSTOM' | 'FULL_BEHALF'>('EQUAL');
-  const [date, setDate] = useState(`${activeMonth}-15`);
+  const [date, setDate] = useState(getTodayStr);
   const [notes, setNotes] = useState('');
   const [imageUrl, setImageUrl] = useState('');
   const [isUploading, setIsUploading] = useState(false);
@@ -28,7 +30,10 @@ export const AddExpenseModal: React.FC = () => {
 
   useEffect(() => {
     if (currentUser) setPayerId(currentUser.id);
-  }, [currentUser]);
+    if (isAddExpenseOpen) {
+      setDate(getTodayStr());
+    }
+  }, [currentUser, isAddExpenseOpen]);
 
   if (!isAddExpenseOpen) return null;
 

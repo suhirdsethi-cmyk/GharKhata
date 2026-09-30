@@ -70,7 +70,9 @@ def get_settlements(household_code: Optional[str] = None):
     return [_hydrate_settlement(s) for s in settlements]
 
 @router.get("/stats")
-def get_dashboard_stats(month_year: Optional[str] = "2026-09", household_code: Optional[str] = None):
+def get_dashboard_stats(month_year: Optional[str] = None, household_code: Optional[str] = None):
+    if not month_year:
+        month_year = datetime.datetime.utcnow().strftime("%Y-%m")
     inflow_query = {"month_year": month_year}
     pool_exp_query = {"funding_source": "RENTAL_POOL", "date": {"$regex": f"^{month_year}"}}
     pers_exp_query = {"funding_source": "PERSONAL", "date": {"$regex": f"^{month_year}"}}
