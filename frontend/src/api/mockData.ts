@@ -571,3 +571,4 @@ export function offlineFetchDashboardStats(monthYear: string): DashboardStats {
     category_breakdown: categoryBreakdown
   };
 }
+
