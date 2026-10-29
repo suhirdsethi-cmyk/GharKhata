@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import { googleLogout } from '@react-oauth/google';
-import { fetchUsers, fetchDashboardStats, toggleMarketStatus, loginWithGoogle, joinHousehold, createHousehold, switchLedgerMode } from '../api/client';
+import { fetchUsers, fetchDashboardStats, toggleMarketStatus, loginWithGoogle, quickLogin, joinHousehold, createHousehold, switchLedgerMode } from '../api/client';
 import { User, DashboardStats, InflowPool, ErrandItem, MarketStatus } from '../types';
 
 export type AppTab = 'home' | 'diary' | 'market' | 'dues';
@@ -10,6 +10,7 @@ interface AppContextType {
   currentUser: User | null;
   setCurrentUser: (user: User) => void;
   loginUserWithGoogle: (credential: string, householdCode?: string) => Promise<User>;
+  quickLoginUser: (name?: string, householdCode?: string) => Promise<User>;
   joinUserHousehold: (householdCode: string) => Promise<User>;
   createGroupHousehold: (customCode?: string) => Promise<User>;
   switchUserMode: (mode: 'PERSONAL' | 'FAMILY') => Promise<User>;
@@ -165,6 +166,15 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     return user;
   };
 
+  const quickLoginUser = async (name?: string, householdCode?: string): Promise<User> => {
+    const user = await quickLogin(name || 'Suhird Singh', householdCode);
+    setCurrentUser(user);
+    try {
+      localStorage.setItem('gharkhata_current_user', JSON.stringify(user));
+    } catch (e) {}
+    return user;
+  };
+
   const joinUserHousehold = async (householdCode: string): Promise<User> => {
     if (!currentUser) throw new Error("No logged in user");
     const updatedUser = await joinHousehold(currentUser.id, householdCode);
@@ -212,6 +222,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         currentUser,
         setCurrentUser,
         loginUserWithGoogle,
+        quickLoginUser,
         joinUserHousehold,
         createGroupHousehold,
         switchUserMode,

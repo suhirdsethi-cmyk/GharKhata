@@ -100,10 +100,43 @@
       "household_code": "GHAR-SINGHFAMILY",
       "created_at": "2026-09-12T14:00:00",
       "splits": [
-        { "id": 1, "expense_id": 3, "user_id": 1, "share_amount": 600.0, "is_settled": false },
-        { "id": 2, "expense_id": 3, "user_id": 2, "share_amount": 600.0, "is_settled": false },
-        { "id": 3, "expense_id": 3, "user_id": 3, "share_amount": 600.0, "is_settled": false }
+        {
+          "id": 1,
+          "expense_id": 3,
+          "user_id": 1,
+          "share_amount": 600.0,
+          "is_settled": false
+        },
+        {
+          "id": 2,
+          "expense_id": 3,
+          "user_id": 2,
+          "share_amount": 600.0,
+          "is_settled": false
+        },
+        {
+          "id": 3,
+          "expense_id": 3,
+          "user_id": 3,
+          "share_amount": 600.0,
+          "is_settled": false
+        }
       ]
+    },
+    {
+      "id": 4,
+      "title": "milk",
+      "amount": 1400.0,
+      "category": "Groceries",
+      "payer_id": 1,
+      "funding_source": "RENTAL_POOL",
+      "split_type": "EQUAL",
+      "date": "2026-10-28",
+      "receipt_note": "",
+      "image_url": "",
+      "household_code": "GHAR-SINGHFAMILY",
+      "created_at": "2026-10-28T06:58:55.884747",
+      "splits": []
     }
   ],
   "errand_items": [
@@ -170,12 +203,33 @@
     }
   ],
   "counters": [
-    { "seq_name": "users", "seq": 3 },
-    { "seq_name": "inflow_pools", "seq": 2 },
-    { "seq_name": "expenses", "seq": 3 },
-    { "seq_name": "expense_splits", "seq": 3 },
-    { "seq_name": "errand_items", "seq": 3 },
-    { "seq_name": "market_status", "seq": 3 },
-    { "seq_name": "settlements", "seq": 1 }
+    {
+      "seq": 3,
+      "seq_name": "users"
+    },
+    {
+      "seq": 2,
+      "seq_name": "inflow_pools"
+    },
+    {
+      "seq": 3,
+      "seq_name": "expenses"
+    },
+    {
+      "seq": 3,
+      "seq_name": "expense_splits"
+    },
+    {
+      "seq": 3,
+      "seq_name": "errand_items"
+    },
+    {
+      "seq": 3,
+      "seq_name": "market_status"
+    },
+    {
+      "seq": 1,
+      "seq_name": "settlements"
+    }
   ]
 }

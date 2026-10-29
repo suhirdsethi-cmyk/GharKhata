@@ -25,6 +25,13 @@ class GoogleAuthRequest(BaseModel):
     credential: str
     household_code: Optional[str] = None # Optional code to join an existing family household right away
 
+class QuickLoginRequest(BaseModel):
+    name: str
+    email: Optional[str] = None
+    household_code: Optional[str] = None
+    role: Optional[str] = "Admin"
+    user_id: Optional[int] = None
+
 class JoinHouseholdRequest(BaseModel):
     user_id: int
     household_code: str
@@ -111,6 +118,54 @@ def google_auth(auth_in: GoogleAuthRequest):
 
     except Exception as e:
         raise HTTPException(status_code=400, detail=f"Google authentication failed: {str(e)}")
+
+@router.post("/quick-login")
+def quick_login(req: QuickLoginRequest):
+    try:
+        user = None
+        if req.user_id:
+            user = users_collection.find_one({"id": req.user_id})
+        elif req.email:
+            user = users_collection.find_one({"email": req.email})
+        elif req.name:
+            user = users_collection.find_one({"name": req.name})
+
+        if not user:
+            target_code = req.household_code.strip().upper() if req.household_code else "GHAR-SINGHFAMILY"
+            new_id = get_next_id("users")
+            name_clean = req.name.strip() if req.name else f"User {new_id}"
+            user = {
+                "id": new_id,
+                "google_id": f"quick_{new_id}",
+                "email": req.email or f"user_{new_id}@gharkhata.local",
+                "name": name_clean,
+                "role": req.role or "Member",
+                "avatar_color": "#3B82F6" if new_id % 2 == 1 else "#10B981",
+                "picture": None,
+                "household_code": target_code,
+                "family_household_code": target_code,
+                "personal_household_code": f"GHAR-PERS-{new_id}",
+                "active_mode": "FAMILY",
+                "created_at": datetime.datetime.utcnow().isoformat()
+            }
+            users_collection.insert_one(user)
+            market_collection.insert_one({
+                "id": get_next_id("market_status"),
+                "user_id": new_id,
+                "household_code": target_code,
+                "is_active": False,
+                "updated_at": datetime.datetime.utcnow().isoformat()
+            })
+        else:
+            if req.household_code:
+                code = req.household_code.strip().upper()
+                users_collection.update_one({"id": user["id"]}, {"$set": {"household_code": code}})
+                user = users_collection.find_one({"id": user["id"]})
+
+        user.pop("_id", None)
+        return {"status": "success", "user": user}
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=f"Quick login failed: {str(e)}")
 
 @router.post("/switch-mode")
 def switch_mode(req: SwitchModeRequest):
