@@ -18,32 +18,29 @@ import {
 export const LoginScreen: React.FC = () => {
   const { loginUserWithGoogle, quickLoginUser } = useApp();
   
-  const [activeTab, setActiveTab] = useState<'create' | 'join'>('create');
+  const getInitialJoinCode = () => {
+    try {
+      const params = new URLSearchParams(window.location.search);
+      return (params.get('join') || params.get('code') || params.get('household') || '').trim().toUpperCase();
+    } catch (e) {
+      return '';
+    }
+  };
+
+  const initialCode = getInitialJoinCode();
+  const [activeTab, setActiveTab] = useState<'create' | 'join'>(() => initialCode ? 'join' : 'create');
   
   // Create Household state
   const [createName, setCreateName] = useState('');
   const [customCode, setCustomCode] = useState('');
 
   // Join Household state
-  const [joinCode, setJoinCode] = useState('');
+  const [joinCode, setJoinCode] = useState<string>(() => initialCode);
   const [joinName, setJoinName] = useState('');
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
-  const [inviteDetected, setInviteDetected] = useState(false);
-
-  // Check URL parameters for invite links: ?join=CODE or ?code=CODE
-  useEffect(() => {
-    try {
-      const params = new URLSearchParams(window.location.search);
-      const code = params.get('join') || params.get('code') || params.get('household');
-      if (code) {
-        setJoinCode(code.trim().toUpperCase());
-        setActiveTab('join');
-        setInviteDetected(true);
-      }
-    } catch (e) {}
-  }, []);
+  const [inviteDetected, setInviteDetected] = useState<boolean>(() => Boolean(initialCode));
 
   const handleCreateSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
