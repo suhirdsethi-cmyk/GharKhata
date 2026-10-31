@@ -19,6 +19,7 @@ export interface InflowPool {
   title: string;
   amount: number;
   month_year: string;
+  household_code?: string;
   created_at: string;
 }
 
@@ -45,6 +46,7 @@ export interface Expense {
   date: string;
   receipt_note?: string;
   image_url?: string;
+  household_code?: string;
   created_at: string;
   payer?: User;
   splits: ExpenseSplit[];
@@ -58,6 +60,7 @@ export interface ErrandItem {
   category: string;
   status: ErrandStatus;
   added_by_id: number;
+  household_code?: string;
   created_at: string;
   added_by?: User;
 }
@@ -66,6 +69,7 @@ export interface MarketStatus {
   id: number;
   user_id: number;
   is_active: boolean;
+  household_code?: string;
   updated_at: string;
   user?: User;
 }
@@ -76,6 +80,7 @@ export interface Settlement {
   receiver_id: number;
   amount: number;
   notes?: string;
+  household_code?: string;
   created_at: string;
   payer?: User;
   receiver?: User;

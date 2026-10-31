@@ -10,7 +10,7 @@ interface AppContextType {
   currentUser: User | null;
   setCurrentUser: (user: User) => void;
   loginUserWithGoogle: (credential: string, householdCode?: string) => Promise<User>;
-  quickLoginUser: (name?: string, householdCode?: string) => Promise<User>;
+  quickLoginUser: (name: string, householdCode?: string, isCreatingNewHousehold?: boolean) => Promise<User>;
   joinUserHousehold: (householdCode: string) => Promise<User>;
   createGroupHousehold: (customCode?: string) => Promise<User>;
   switchUserMode: (mode: 'PERSONAL' | 'FAMILY') => Promise<User>;
@@ -102,20 +102,17 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const refreshData = useCallback(async () => {
     try {
       setLoading(true);
-      const hCode = currentUser?.household_code || 'GHAR-SINGHFAMILY';
+      if (!currentUser) {
+        setUsers([]);
+        setStats(null);
+        setLoading(false);
+        return;
+      }
+      const hCode = currentUser.household_code || currentUser.family_household_code || '';
       const fetchedUsers = await fetchUsers(hCode);
       setUsers(fetchedUsers);
-      
-      let effectiveUser = currentUser;
-      if (!effectiveUser && fetchedUsers.length > 0) {
-        effectiveUser = fetchedUsers[0];
-        setCurrentUser(effectiveUser);
-        try {
-          localStorage.setItem('gharkhata_current_user', JSON.stringify(effectiveUser));
-        } catch (e) {}
-      }
 
-      const fetchedStats = await fetchDashboardStats(activeMonth, effectiveUser?.household_code || hCode);
+      const fetchedStats = await fetchDashboardStats(activeMonth, hCode);
       setStats(fetchedStats);
     } catch (err) {
       console.error('Error refreshing app data:', err);
@@ -166,8 +163,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     return user;
   };
 
-  const quickLoginUser = async (name?: string, householdCode?: string): Promise<User> => {
-    const user = await quickLogin(name || 'Suhird Singh', householdCode);
+  const quickLoginUser = async (name: string, householdCode?: string, isCreatingNewHousehold = false): Promise<User> => {
+    const user = await quickLogin(name, householdCode, isCreatingNewHousehold);
     setCurrentUser(user);
     try {
       localStorage.setItem('gharkhata_current_user', JSON.stringify(user));

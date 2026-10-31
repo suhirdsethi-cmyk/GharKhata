@@ -9,7 +9,7 @@ interface OfflineStore {
   settlements: Settlement[];
 }
 
-const STORAGE_KEY = 'gharkhata_offline_store_v2';
+const STORAGE_KEY = 'gharkhata_offline_store_v3';
 
 const SEED_DATA: OfflineStore = {
   users: [
@@ -56,6 +56,7 @@ const SEED_DATA: OfflineStore = {
       title: 'Ground Floor Rent - Flat 101',
       amount: 35000.0,
       month_year: '2026-10',
+      household_code: 'GHAR-SINGHFAMILY',
       created_at: '2026-10-01T00:00:00'
     },
     {
@@ -63,6 +64,7 @@ const SEED_DATA: OfflineStore = {
       title: 'First Floor Rent - Flat 201',
       amount: 25000.0,
       month_year: '2026-10',
+      household_code: 'GHAR-SINGHFAMILY',
       created_at: '2026-10-01T00:00:00'
     },
     {
@@ -70,6 +72,7 @@ const SEED_DATA: OfflineStore = {
       title: 'Ground Floor Rent - Flat 101',
       amount: 35000.0,
       month_year: '2026-09',
+      household_code: 'GHAR-SINGHFAMILY',
       created_at: '2026-09-01T00:00:00'
     },
     {
@@ -77,6 +80,7 @@ const SEED_DATA: OfflineStore = {
       title: 'First Floor Rent - Flat 201',
       amount: 25000.0,
       month_year: '2026-09',
+      household_code: 'GHAR-SINGHFAMILY',
       created_at: '2026-09-01T00:00:00'
     }
   ],
@@ -91,6 +95,7 @@ const SEED_DATA: OfflineStore = {
       split_type: 'EQUAL',
       date: '2026-10-02',
       receipt_note: 'Paid from central rental cash reserve',
+      household_code: 'GHAR-SINGHFAMILY',
       created_at: '2026-10-02T10:00:00',
       splits: []
     },
@@ -104,6 +109,7 @@ const SEED_DATA: OfflineStore = {
       split_type: 'EQUAL',
       date: '2026-10-05',
       receipt_note: 'Paid online via net banking',
+      household_code: 'GHAR-SINGHFAMILY',
       created_at: '2026-10-05T12:00:00',
       splits: []
     },
@@ -117,6 +123,7 @@ const SEED_DATA: OfflineStore = {
       split_type: 'EQUAL',
       date: '2026-10-12',
       receipt_note: 'Paid cash out-of-pocket by Suhird',
+      household_code: 'GHAR-SINGHFAMILY',
       created_at: '2026-10-12T14:00:00',
       splits: [
         { id: 1, expense_id: 3, user_id: 1, share_amount: 600.0, is_settled: false },
@@ -134,6 +141,7 @@ const SEED_DATA: OfflineStore = {
       split_type: 'EQUAL',
       date: '2026-10-28',
       receipt_note: 'Quick daily grocery',
+      household_code: 'GHAR-SINGHFAMILY',
       created_at: '2026-10-28T07:00:00',
       splits: []
     }
@@ -145,6 +153,7 @@ const SEED_DATA: OfflineStore = {
       category: 'Vegetables & Fruit',
       status: 'PENDING',
       added_by_id: 1,
+      household_code: 'GHAR-SINGHFAMILY',
       created_at: '2026-10-28T09:00:00'
     },
     {
@@ -153,6 +162,7 @@ const SEED_DATA: OfflineStore = {
       category: 'Dairy & Bread',
       status: 'IN_CART',
       added_by_id: 3,
+      household_code: 'GHAR-SINGHFAMILY',
       created_at: '2026-10-28T10:00:00'
     },
     {
@@ -161,13 +171,14 @@ const SEED_DATA: OfflineStore = {
       category: 'Household & Cleaning',
       status: 'BOUGHT',
       added_by_id: 2,
+      household_code: 'GHAR-SINGHFAMILY',
       created_at: '2026-10-28T11:00:00'
     }
   ],
   market_statuses: [
-    { id: 1, user_id: 1, is_active: false, updated_at: '2026-10-28T09:00:00' },
-    { id: 2, user_id: 2, is_active: true, updated_at: '2026-10-28T10:30:00' },
-    { id: 3, user_id: 3, is_active: false, updated_at: '2026-10-28T09:00:00' }
+    { id: 1, user_id: 1, is_active: false, household_code: 'GHAR-SINGHFAMILY', updated_at: '2026-10-28T09:00:00' },
+    { id: 2, user_id: 2, is_active: true, household_code: 'GHAR-SINGHFAMILY', updated_at: '2026-10-28T10:30:00' },
+    { id: 3, user_id: 3, is_active: false, household_code: 'GHAR-SINGHFAMILY', updated_at: '2026-10-28T09:00:00' }
   ],
   settlements: [
     {
@@ -176,6 +187,7 @@ const SEED_DATA: OfflineStore = {
       receiver_id: 1,
       amount: 500.0,
       notes: 'UPI transfer for last weekend groceries',
+      household_code: 'GHAR-SINGHFAMILY',
       created_at: '2026-10-15T15:30:00'
     }
   ]
@@ -207,32 +219,44 @@ export function saveOfflineStore(store: OfflineStore): void {
   }
 }
 
-export function offlineQuickLogin(name: string, householdCode?: string): User {
+export function generateHouseholdCode(): string {
+  const digits = Math.floor(1000 + Math.random() * 9000);
+  return `GHAR-${digits}`;
+}
+
+export function offlineQuickLogin(name: string, householdCode?: string, isCreatingNewHousehold = false): User {
   const store = getOfflineStore();
   const cleanName = (name || '').trim();
-  const targetCode = (householdCode || 'GHAR-SINGHFAMILY').trim().toUpperCase();
 
-  let existing = store.users.find(
-    (u) => u.name.toLowerCase() === cleanName.toLowerCase()
-  );
+  let targetCode = householdCode ? householdCode.trim().toUpperCase() : '';
 
-  if (!existing && !cleanName) {
-    existing = store.users[0];
+  // If user explicitly chose to create a new household or didn't provide any code, generate a unique code
+  if (isCreatingNewHousehold || !targetCode) {
+    if (!targetCode) {
+      targetCode = generateHouseholdCode();
+    }
   }
 
+  // Look for existing user with this name in this household
+  const existing = store.users.find(
+    (u) =>
+      u.name.toLowerCase() === cleanName.toLowerCase() &&
+      (u.household_code === targetCode || u.family_household_code === targetCode)
+  );
+
   if (existing) {
-    if (householdCode) {
-      existing.household_code = targetCode;
-      saveOfflineStore(store);
-    }
     return existing;
   }
 
   const newId = store.users.length > 0 ? Math.max(...store.users.map((u) => u.id)) + 1 : 1;
+  const isFirstInHousehold = !store.users.some(
+    (u) => u.household_code === targetCode || u.family_household_code === targetCode
+  );
+
   const newUser: User = {
     id: newId,
     name: cleanName || `User ${newId}`,
-    role: 'Member',
+    role: isFirstInHousehold || isCreatingNewHousehold ? 'Admin' : 'Member',
     avatar_color: newId % 2 === 1 ? '#3B82F6' : '#10B981',
     household_code: targetCode,
     family_household_code: targetCode,
@@ -245,6 +269,7 @@ export function offlineQuickLogin(name: string, householdCode?: string): User {
   store.market_statuses.push({
     id: newId,
     user_id: newId,
+    household_code: targetCode,
     is_active: false,
     updated_at: new Date().toISOString()
   });
@@ -256,17 +281,28 @@ export function offlineFetchUsers(householdCode?: string): User[] {
   const store = getOfflineStore();
   if (!householdCode) return store.users;
   const code = householdCode.trim().toUpperCase();
-  const filtered = store.users.filter((u) => u.household_code === code || u.family_household_code === code);
-  return filtered.length > 0 ? filtered : store.users;
+  return store.users.filter(
+    (u) =>
+      u.household_code === code ||
+      u.family_household_code === code ||
+      u.personal_household_code === code
+  );
 }
 
-export function offlineFetchInflows(monthYear?: string): InflowPool[] {
+export function offlineFetchInflows(monthYear?: string, householdCode?: string): InflowPool[] {
   const store = getOfflineStore();
-  if (!monthYear) return store.inflows;
-  return store.inflows.filter((i) => i.month_year === monthYear);
+  let list = store.inflows;
+  if (householdCode) {
+    const code = householdCode.trim().toUpperCase();
+    list = list.filter((i) => (i.household_code || 'GHAR-SINGHFAMILY').toUpperCase() === code);
+  }
+  if (monthYear) {
+    list = list.filter((i) => i.month_year === monthYear);
+  }
+  return list;
 }
 
-export function offlineCreateInflow(data: { title: string; amount: number; month_year: string }): InflowPool {
+export function offlineCreateInflow(data: { title: string; amount: number; month_year: string; household_code?: string }): InflowPool {
   const store = getOfflineStore();
   const newId = store.inflows.length > 0 ? Math.max(...store.inflows.map((i) => i.id)) + 1 : 1;
   const newInflow: InflowPool = {
@@ -274,6 +310,7 @@ export function offlineCreateInflow(data: { title: string; amount: number; month
     title: data.title,
     amount: Number(data.amount),
     month_year: data.month_year,
+    household_code: (data.household_code || 'GHAR-SINGHFAMILY').trim().toUpperCase(),
     created_at: new Date().toISOString()
   };
   store.inflows.unshift(newInflow);
@@ -287,10 +324,19 @@ export function offlineDeleteInflow(id: number): void {
   saveOfflineStore(store);
 }
 
-export function offlineFetchExpenses(params?: { month_year?: string; category?: string; search?: string }): Expense[] {
+export function offlineFetchExpenses(params?: {
+  month_year?: string;
+  category?: string;
+  search?: string;
+  household_code?: string;
+}): Expense[] {
   const store = getOfflineStore();
   let list = [...store.expenses];
 
+  if (params?.household_code) {
+    const code = params.household_code.trim().toUpperCase();
+    list = list.filter((e) => (e.household_code || 'GHAR-SINGHFAMILY').toUpperCase() === code);
+  }
   if (params?.month_year) {
     list = list.filter((e) => e.date.startsWith(params.month_year!));
   }
@@ -306,7 +352,7 @@ export function offlineFetchExpenses(params?: { month_year?: string; category?: 
   return list.map((e) => ({
     ...e,
     payer: store.users.find((u) => u.id === e.payer_id),
-    splits: e.splits.map((s) => ({
+    splits: (e.splits || []).map((s) => ({
       ...s,
       user: store.users.find((u) => u.id === s.user_id)
     }))
@@ -323,6 +369,7 @@ export function offlineCreateExpense(data: {
   date: string;
   receipt_note?: string;
   image_url?: string;
+  household_code?: string;
   splits?: { user_id: number; share_amount: number }[];
 }): Expense {
   const store = getOfflineStore();
@@ -336,6 +383,8 @@ export function offlineCreateExpense(data: {
     is_settled: false
   }));
 
+  const targetCode = (data.household_code || 'GHAR-SINGHFAMILY').trim().toUpperCase();
+
   const newExp: Expense = {
     id: newId,
     title: data.title,
@@ -347,6 +396,7 @@ export function offlineCreateExpense(data: {
     date: data.date,
     receipt_note: data.receipt_note,
     image_url: data.image_url,
+    household_code: targetCode,
     created_at: new Date().toISOString(),
     splits
   };
@@ -365,9 +415,14 @@ export function offlineDeleteExpense(id: number): void {
   saveOfflineStore(store);
 }
 
-export function offlineFetchErrands(category?: string, status?: string): ErrandItem[] {
+export function offlineFetchErrands(category?: string, status?: string, householdCode?: string): ErrandItem[] {
   const store = getOfflineStore();
   let list = [...store.errands];
+
+  if (householdCode) {
+    const code = householdCode.trim().toUpperCase();
+    list = list.filter((e) => (e.household_code || 'GHAR-SINGHFAMILY').toUpperCase() === code);
+  }
   if (category && category !== 'ALL') {
     list = list.filter((item) => item.category === category);
   }
@@ -380,15 +435,18 @@ export function offlineFetchErrands(category?: string, status?: string): ErrandI
   }));
 }
 
-export function offlineCreateErrand(data: { name: string; category: string; added_by_id: number }): ErrandItem {
+export function offlineCreateErrand(data: { name: string; category: string; added_by_id: number; household_code?: string }): ErrandItem {
   const store = getOfflineStore();
   const newId = store.errands.length > 0 ? Math.max(...store.errands.map((e) => e.id)) + 1 : 1;
+  const targetCode = (data.household_code || 'GHAR-SINGHFAMILY').trim().toUpperCase();
+
   const newErrand: ErrandItem = {
     id: newId,
     name: data.name,
     category: data.category,
     status: 'PENDING',
     added_by_id: data.added_by_id,
+    household_code: targetCode,
     created_at: new Date().toISOString()
   };
   store.errands.unshift(newErrand);
@@ -417,12 +475,33 @@ export function offlineDeleteErrand(id: number): void {
   saveOfflineStore(store);
 }
 
+export function offlineFetchMarketStatuses(householdCode?: string): MarketStatus[] {
+  const store = getOfflineStore();
+  let list = store.market_statuses;
+  if (householdCode) {
+    const code = householdCode.trim().toUpperCase();
+    list = list.filter((m) => (m.household_code || 'GHAR-SINGHFAMILY').toUpperCase() === code);
+  }
+  return list.map((ms) => ({
+    ...ms,
+    user: store.users.find((u) => u.id === ms.user_id)
+  }));
+}
+
 export function offlineToggleMarketStatus(userId: number, isActive?: boolean): MarketStatus {
   const store = getOfflineStore();
   let ms = store.market_statuses.find((m) => m.user_id === userId);
+  const user = store.users.find((u) => u.id === userId);
   const nextActive = isActive !== undefined ? isActive : ms ? !ms.is_active : true;
+
   if (!ms) {
-    ms = { id: userId, user_id: userId, is_active: nextActive, updated_at: new Date().toISOString() };
+    ms = {
+      id: userId,
+      user_id: userId,
+      household_code: user?.household_code || 'GHAR-SINGHFAMILY',
+      is_active: nextActive,
+      updated_at: new Date().toISOString()
+    };
     store.market_statuses.push(ms);
   } else {
     ms.is_active = nextActive;
@@ -431,25 +510,39 @@ export function offlineToggleMarketStatus(userId: number, isActive?: boolean): M
   saveOfflineStore(store);
   return {
     ...ms,
-    user: store.users.find((u) => u.id === userId)
+    user
   };
 }
 
-export function offlineCalculateNetDues(): NetBalanceItem[] {
+export function offlineCalculateNetDues(householdCode?: string): NetBalanceItem[] {
   const store = getOfflineStore();
+  const targetCode = householdCode ? householdCode.trim().toUpperCase() : '';
+
+  const relevantUsers = targetCode
+    ? store.users.filter(
+        (u) =>
+          (u.household_code || '').toUpperCase() === targetCode ||
+          (u.family_household_code || '').toUpperCase() === targetCode
+      )
+    : store.users;
+
   const userMap: { [id: number]: string } = {};
   const netBalances: { [id: number]: number } = {};
 
-  store.users.forEach((u) => {
+  relevantUsers.forEach((u) => {
     userMap[u.id] = u.name;
     netBalances[u.id] = 0.0;
   });
 
-  store.expenses
+  const relevantExpenses = targetCode
+    ? store.expenses.filter((e) => (e.household_code || '').toUpperCase() === targetCode)
+    : store.expenses;
+
+  relevantExpenses
     .filter((e) => e.funding_source === 'PERSONAL')
     .forEach((exp) => {
       const payerId = exp.payer_id;
-      exp.splits.forEach((split) => {
+      (exp.splits || []).forEach((split) => {
         if (!split.is_settled && split.user_id !== payerId) {
           if (netBalances[split.user_id] !== undefined) netBalances[split.user_id] -= split.share_amount;
           if (netBalances[payerId] !== undefined) netBalances[payerId] += split.share_amount;
@@ -457,7 +550,11 @@ export function offlineCalculateNetDues(): NetBalanceItem[] {
       });
     });
 
-  store.settlements.forEach((st) => {
+  const relevantSettlements = targetCode
+    ? store.settlements.filter((s) => (s.household_code || '').toUpperCase() === targetCode)
+    : store.settlements;
+
+  relevantSettlements.forEach((st) => {
     if (netBalances[st.payer_id] !== undefined) netBalances[st.payer_id] += st.amount;
     if (netBalances[st.receiver_id] !== undefined) netBalances[st.receiver_id] -= st.amount;
   });
@@ -505,15 +602,24 @@ export function offlineCalculateNetDues(): NetBalanceItem[] {
   return results;
 }
 
-export function offlineRecordSettlement(data: { payer_id: number; receiver_id: number; amount: number; notes?: string }): Settlement {
+export function offlineRecordSettlement(data: {
+  payer_id: number;
+  receiver_id: number;
+  amount: number;
+  notes?: string;
+  household_code?: string;
+}): Settlement {
   const store = getOfflineStore();
   const newId = store.settlements.length > 0 ? Math.max(...store.settlements.map((s) => s.id)) + 1 : 1;
+  const targetCode = (data.household_code || 'GHAR-SINGHFAMILY').trim().toUpperCase();
+
   const newSt: Settlement = {
     id: newId,
     payer_id: data.payer_id,
     receiver_id: data.receiver_id,
     amount: Number(data.amount),
     notes: data.notes,
+    household_code: targetCode,
     created_at: new Date().toISOString()
   };
   store.settlements.unshift(newSt);
@@ -525,22 +631,37 @@ export function offlineRecordSettlement(data: { payer_id: number; receiver_id: n
   };
 }
 
-export function offlineFetchSettlementHistory(): Settlement[] {
+export function offlineFetchSettlementHistory(householdCode?: string): Settlement[] {
   const store = getOfflineStore();
-  return store.settlements.map((s) => ({
+  let list = store.settlements;
+  if (householdCode) {
+    const code = householdCode.trim().toUpperCase();
+    list = list.filter((s) => (s.household_code || 'GHAR-SINGHFAMILY').toUpperCase() === code);
+  }
+  return list.map((s) => ({
     ...s,
     payer: store.users.find((u) => u.id === s.payer_id),
     receiver: store.users.find((u) => u.id === s.receiver_id)
   }));
 }
 
-export function offlineFetchDashboardStats(monthYear: string): DashboardStats {
+export function offlineFetchDashboardStats(monthYear: string, householdCode?: string): DashboardStats {
   const store = getOfflineStore();
+  const targetCode = householdCode ? householdCode.trim().toUpperCase() : '';
 
-  const monthInflows = store.inflows.filter((i) => i.month_year === monthYear);
+  const monthInflows = store.inflows.filter((i) => {
+    const matchMonth = i.month_year === monthYear;
+    const matchHouse = !targetCode || (i.household_code || '').toUpperCase() === targetCode;
+    return matchMonth && matchHouse;
+  });
   const totalInflow = monthInflows.reduce((sum, i) => sum + Number(i.amount), 0);
 
-  const monthExpenses = store.expenses.filter((e) => e.date.startsWith(monthYear));
+  const monthExpenses = store.expenses.filter((e) => {
+    const matchMonth = e.date.startsWith(monthYear);
+    const matchHouse = !targetCode || (e.household_code || '').toUpperCase() === targetCode;
+    return matchMonth && matchHouse;
+  });
+
   const poolExpenses = monthExpenses.filter((e) => e.funding_source === 'RENTAL_POOL');
   const spentFromPool = poolExpenses.reduce((sum, e) => sum + Number(e.amount), 0);
   const remainingPool = totalInflow - spentFromPool;
@@ -548,9 +669,13 @@ export function offlineFetchDashboardStats(monthYear: string): DashboardStats {
   const personalExpenses = monthExpenses.filter((e) => e.funding_source === 'PERSONAL');
   const totalPersonal = personalExpenses.reduce((sum, e) => sum + Number(e.amount), 0);
 
-  const netDues = offlineCalculateNetDues();
+  const netDues = offlineCalculateNetDues(targetCode);
 
-  const activeBeacons: MarketStatus[] = store.market_statuses.map((ms) => ({
+  const relevantBeacons = targetCode
+    ? store.market_statuses.filter((m) => (m.household_code || '').toUpperCase() === targetCode)
+    : store.market_statuses;
+
+  const activeBeacons: MarketStatus[] = relevantBeacons.map((ms) => ({
     ...ms,
     user: store.users.find((u) => u.id === ms.user_id)
   }));
@@ -571,4 +696,3 @@ export function offlineFetchDashboardStats(monthYear: string): DashboardStats {
     category_breakdown: categoryBreakdown
   };
 }
-

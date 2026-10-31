@@ -44,7 +44,8 @@ export const Navbar: React.FC = () => {
 
   const handleCopyHouseholdCode = () => {
     if (!currentUser?.household_code) return;
-    navigator.clipboard.writeText(currentUser.household_code);
+    const inviteLink = `${window.location.origin}/?join=${currentUser.household_code}`;
+    navigator.clipboard.writeText(inviteLink);
     setCopiedCode(true);
     setTimeout(() => setCopiedCode(false), 2000);
   };

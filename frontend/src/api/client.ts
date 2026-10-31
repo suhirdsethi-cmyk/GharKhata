@@ -22,16 +22,35 @@ import {
   offlineCreateErrand,
   offlineUpdateErrand,
   offlineDeleteErrand,
+  offlineFetchMarketStatuses,
   offlineToggleMarketStatus,
   offlineCalculateNetDues,
   offlineRecordSettlement,
   offlineFetchSettlementHistory,
   offlineFetchDashboardStats,
+  generateHouseholdCode,
   getOfflineStore,
   saveOfflineStore
 } from './mockData';
 
 const API_BASE = import.meta.env.VITE_API_URL || '';
+
+function parseJwt(token: string): any {
+  try {
+    const base64Url = token.split('.')[1];
+    const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+    const jsonPayload = decodeURIComponent(
+      window
+        .atob(base64)
+        .split('')
+        .map((c) => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2))
+        .join('')
+    );
+    return JSON.parse(jsonPayload);
+  } catch (e) {
+    return null;
+  }
+}
 
 export async function loginWithGoogle(credential: string, householdCode?: string): Promise<User> {
   try {
@@ -45,12 +64,21 @@ export async function loginWithGoogle(credential: string, householdCode?: string
       return data.user;
     }
   } catch (err) {
-    console.warn('Backend unavailable, using offline login:', err);
+    console.warn('Backend unavailable, using offline login with Google profile info:', err);
   }
-  return offlineQuickLogin('Suhird Singh', householdCode);
+
+  const profile = parseJwt(credential);
+  const name = profile?.name || 'Google User';
+  const email = profile?.email;
+  const picture = profile?.picture;
+
+  const user = offlineQuickLogin(name, householdCode, !householdCode);
+  if (email) user.email = email;
+  if (picture) user.picture = picture;
+  return user;
 }
 
-export async function quickLogin(name: string, householdCode?: string): Promise<User> {
+export async function quickLogin(name: string, householdCode?: string, isCreatingNewHousehold = false): Promise<User> {
   try {
     const res = await fetch(`${API_BASE}/api/auth/quick-login`, {
       method: 'POST',
@@ -64,15 +92,16 @@ export async function quickLogin(name: string, householdCode?: string): Promise<
   } catch (err) {
     console.warn('Backend unavailable for quick-login, falling back to local storage:', err);
   }
-  return offlineQuickLogin(name, householdCode);
+  return offlineQuickLogin(name, householdCode, isCreatingNewHousehold);
 }
 
 export async function joinHousehold(userId: number, householdCode: string): Promise<User> {
+  const code = householdCode.trim().toUpperCase();
   try {
     const res = await fetch(`${API_BASE}/api/auth/join-household`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ user_id: userId, household_code: householdCode })
+      body: JSON.stringify({ user_id: userId, household_code: code })
     });
     if (res.ok) {
       const data = await res.json();
@@ -84,7 +113,8 @@ export async function joinHousehold(userId: number, householdCode: string): Prom
   const store = getOfflineStore();
   const u = store.users.find((user) => user.id === userId);
   if (u) {
-    u.household_code = householdCode.trim().toUpperCase();
+    u.household_code = code;
+    u.family_household_code = code;
     saveOfflineStore(store);
     return u;
   }
@@ -92,11 +122,12 @@ export async function joinHousehold(userId: number, householdCode: string): Prom
 }
 
 export async function createHousehold(userId: number, customCode?: string): Promise<User> {
+  const code = (customCode || generateHouseholdCode()).trim().toUpperCase();
   try {
     const res = await fetch(`${API_BASE}/api/auth/create-household`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ user_id: userId, custom_code: customCode })
+      body: JSON.stringify({ user_id: userId, custom_code: code })
     });
     if (res.ok) {
       const data = await res.json();
@@ -108,9 +139,9 @@ export async function createHousehold(userId: number, customCode?: string): Prom
   const store = getOfflineStore();
   const u = store.users.find((user) => user.id === userId);
   if (u) {
-    const code = (customCode || `GHAR-${Math.floor(1000 + Math.random() * 9000)}`).trim().toUpperCase();
     u.household_code = code;
     u.family_household_code = code;
+    u.role = 'Admin';
     saveOfflineStore(store);
     return u;
   }
@@ -135,7 +166,7 @@ export async function switchLedgerMode(userId: number, mode: 'PERSONAL' | 'FAMIL
   const u = store.users.find((user) => user.id === userId);
   if (u) {
     u.active_mode = mode;
-    u.household_code = mode === 'PERSONAL' ? u.personal_household_code || `GHAR-PERS-${u.id}` : u.family_household_code || 'GHAR-SINGHFAMILY';
+    u.household_code = mode === 'PERSONAL' ? u.personal_household_code || `GHAR-PERS-${u.id}` : u.family_household_code || u.household_code;
     saveOfflineStore(store);
     return u;
   }
@@ -184,7 +215,7 @@ export async function resetAllData(householdCode?: string): Promise<void> {
     const url = householdCode ? `${API_BASE}/api/users/reset-data?household_code=${householdCode}` : `${API_BASE}/api/users/reset-data`;
     await fetch(url, { method: 'POST' });
   } catch (err) {}
-  localStorage.removeItem('gharkhata_offline_store_v2');
+  localStorage.removeItem('gharkhata_offline_store_v3');
 }
 
 export async function fetchInflows(monthYear?: string, householdCode?: string): Promise<InflowPool[]> {
@@ -196,7 +227,7 @@ export async function fetchInflows(monthYear?: string, householdCode?: string): 
     const res = await fetch(`${API_BASE}/api/inflows?${params.toString()}`);
     if (res.ok) return await res.json();
   } catch (err) {}
-  return offlineFetchInflows(monthYear);
+  return offlineFetchInflows(monthYear, householdCode);
 }
 
 export async function createInflow(data: { title: string; amount: number; month_year: string; household_code?: string }): Promise<InflowPool> {
@@ -320,7 +351,7 @@ export async function fetchErrands(category?: string, status?: string, household
     const res = await fetch(`${API_BASE}/api/errands?${query.toString()}`);
     if (res.ok) return await res.json();
   } catch (err) {}
-  return offlineFetchErrands(category, status);
+  return offlineFetchErrands(category, status, householdCode);
 }
 
 export async function createErrand(data: { name: string; category: string; added_by_id: number; household_code?: string }): Promise<ErrandItem> {
@@ -355,16 +386,12 @@ export async function deleteErrand(id: number): Promise<void> {
   offlineDeleteErrand(id);
 }
 
-export async function fetchMarketStatuses(): Promise<MarketStatus[]> {
+export async function fetchMarketStatuses(householdCode?: string): Promise<MarketStatus[]> {
   try {
     const res = await fetch(`${API_BASE}/api/market-status`);
     if (res.ok) return await res.json();
   } catch (err) {}
-  const store = getOfflineStore();
-  return store.market_statuses.map((ms) => ({
-    ...ms,
-    user: store.users.find((u) => u.id === ms.user_id)
-  }));
+  return offlineFetchMarketStatuses(householdCode);
 }
 
 export async function toggleMarketStatus(userId: number, isActive?: boolean): Promise<MarketStatus> {
@@ -385,7 +412,7 @@ export async function fetchNetDues(householdCode?: string): Promise<NetBalanceIt
     const res = await fetch(url);
     if (res.ok) return await res.json();
   } catch (err) {}
-  return offlineCalculateNetDues();
+  return offlineCalculateNetDues(householdCode);
 }
 
 export async function recordSettlement(data: {
@@ -412,7 +439,7 @@ export async function fetchSettlementHistory(householdCode?: string): Promise<Se
     const res = await fetch(url);
     if (res.ok) return await res.json();
   } catch (err) {}
-  return offlineFetchSettlementHistory();
+  return offlineFetchSettlementHistory(householdCode);
 }
 
 export async function fetchDashboardStats(monthYear: string, householdCode?: string): Promise<DashboardStats> {
@@ -421,5 +448,5 @@ export async function fetchDashboardStats(monthYear: string, householdCode?: str
     const res = await fetch(url);
     if (res.ok) return await res.json();
   } catch (err) {}
-  return offlineFetchDashboardStats(monthYear);
+  return offlineFetchDashboardStats(monthYear, householdCode);
 }

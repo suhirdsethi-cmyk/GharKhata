@@ -48,15 +48,17 @@ export const HouseholdModal: React.FC = () => {
 
   const handleCopyCode = () => {
     if (!currentUser?.household_code) return;
-    navigator.clipboard.writeText(currentUser.household_code);
+    const inviteLink = `${window.location.origin}/?join=${currentUser.household_code}`;
+    navigator.clipboard.writeText(inviteLink);
     setCopiedCode(true);
     setTimeout(() => setCopiedCode(false), 2000);
   };
 
   const handleShareWhatsApp = () => {
     if (!currentUser?.household_code) return;
+    const inviteLink = `${window.location.origin}/?join=${currentUser.household_code}`;
     const text = encodeURIComponent(
-      `Hey! Join our family household on GharKhata using our Household Code: ${currentUser.household_code}`
+      `🏡 Join our family household on GharKhata!\n\nTap this link to join directly:\n${inviteLink}\n\nOr enter Household Code: ${currentUser.household_code}`
     );
     window.open(`https://api.whatsapp.com/send?text=${text}`, '_blank');
   };

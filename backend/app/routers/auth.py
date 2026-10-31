@@ -73,9 +73,11 @@ def google_auth(auth_in: GoogleAuthRequest):
         if not user:
             # Determine Household Code
             target_code = auth_in.household_code.strip().upper() if auth_in.household_code else None
+            is_new_household = False
             
             if not target_code:
-                target_code = "GHAR-SINGHFAMILY"
+                target_code = generate_household_code()
+                is_new_household = True
 
             new_id = get_next_id("users")
             user = {
@@ -83,7 +85,7 @@ def google_auth(auth_in: GoogleAuthRequest):
                 "google_id": google_id,
                 "email": email,
                 "name": name,
-                "role": "Admin",
+                "role": "Admin" if is_new_household else "Member",
                 "avatar_color": "#3B82F6",
                 "picture": picture,
                 "household_code": target_code,
@@ -131,7 +133,13 @@ def quick_login(req: QuickLoginRequest):
             user = users_collection.find_one({"name": req.name})
 
         if not user:
-            target_code = req.household_code.strip().upper() if req.household_code else "GHAR-SINGHFAMILY"
+            if req.household_code:
+                target_code = req.household_code.strip().upper()
+                role = "Member"
+            else:
+                target_code = generate_household_code()
+                role = "Admin"
+
             new_id = get_next_id("users")
             name_clean = req.name.strip() if req.name else f"User {new_id}"
             user = {
@@ -139,7 +147,7 @@ def quick_login(req: QuickLoginRequest):
                 "google_id": f"quick_{new_id}",
                 "email": req.email or f"user_{new_id}@gharkhata.local",
                 "name": name_clean,
-                "role": req.role or "Member",
+                "role": req.role or role,
                 "avatar_color": "#3B82F6" if new_id % 2 == 1 else "#10B981",
                 "picture": None,
                 "household_code": target_code,

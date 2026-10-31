@@ -5,11 +5,7 @@
       "destination": "https://gharkhata-backend.onrender.com/api/$1"
     },
     {
-      "source": "/assets/index-DgmTzRne.js",
-      "destination": "/assets/cache-recovery.js"
-    },
-    {
-      "source": "/assets/index-ClR3RDP6.js",
+      "source": "/assets/(.*)\\.js",
       "destination": "/assets/cache-recovery.js"
     },
     {

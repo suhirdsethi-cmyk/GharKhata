@@ -20,3 +20,4 @@ if (typeof window !== 'undefined' && 'caches' in window) {
 } else if (typeof window !== 'undefined') {
   window.location.reload();
 }
+
